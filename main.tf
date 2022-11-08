@@ -13,6 +13,9 @@ variable "input_name" {
   
 }
 
+output "vpc_id" {
+    value = aws_vpc.vpc_name.id
+}
 
 #Do czego słuźy zmienna vpc_name. Jest niezbędna, ale jej nazwa nie jest nigdzie wpisywana
 resource "aws_vpc" "vpc_name" {
