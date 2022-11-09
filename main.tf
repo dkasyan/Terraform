@@ -4,13 +4,12 @@ provider "aws" {
 
 variable "cloud_name" {
     type = string
-    default = "Chmura_testowa"
+    default = "kasyan.me"
 }
 
-variable "input_name" {
+variable "cost_tag" {
     type = string
-    description = "Set the name of project"
-  
+    description = "Enter a name for the tag prd/int/tst"
 }
 
 output "vpc_id" {
@@ -24,4 +23,23 @@ resource "aws_vpc" "vpc_name" {
         terraform = "true"
         Name = "VPC_${var.cloud_name}"
 }
+}
+
+resource "aws_instance" "ec2" {
+    ami = "ami-096800910c1b781ba"
+    instance_type = "t2.micro"
+    tags = {
+        terraform = "true"
+        Name = "Master_${var.cloud_name}"
+    }
+}
+
+resource "aws_eip" "elasticeip" {
+    instance = aws_instance.ec2.id
+  
+}
+
+output "EIP" {
+    value = aws_eip.elasticeip.public_ip
+  
 }
