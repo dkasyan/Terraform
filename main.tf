@@ -12,6 +12,16 @@ variable "cost_tag" {
     description = "Enter a name for the tag prd/int/tst"
 }
 
+variable "iegreessrules" {
+  type = list(number)
+  default = [80, 443 ]
+}
+
+variable "engreesrules" {
+  type = list(number)
+  default = [80, 443 ]
+}
+
 output "vpc_id" {
     value = aws_vpc.vpc_name.id
 }
@@ -43,6 +53,8 @@ resource "aws_eip" "elasticeip" {
 output "EIP" {
     value = aws_eip.elasticeip.public_ip
 }
+
+
 
 resource "aws_security_group" "webtraffic" {
     name = "Allow HTTPS"
