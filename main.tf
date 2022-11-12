@@ -35,24 +35,8 @@ resource "aws_vpc" "vpc_name" {
 }
 }
 
-resource "aws_instance" "ec2" {
-    ami = "ami-096800910c1b781ba"
-    instance_type = "t2.micro"
-    security_groups = [aws_security_group.webtraffic.name]
-    tags = {
-        terraform = "true"
-        Name = "Master_${var.cloud_name}"
-    }
-}
 
-resource "aws_eip" "elasticeip" {
-    instance = aws_instance.ec2.id
-  
-}
 
-output "EIP" {
-    value = aws_eip.elasticeip.public_ip
-}
 
 
 #Iterator w dynamic block
@@ -76,66 +60,25 @@ resource "aws_security_group" "webtraffic" {
     } 
 }
 
-### Lambdy ###
-
-resource "aws_iam_role" "lambda_role" {
-  name = "Spacelift_Test_Lambda_Function_Role"
-  assume_role_policy = <<EOF
-{
- "Version": "2012-10-17",
- "Statement": [
-   {
-     "Action": "sts:AssumeRole",
-     "Principal": {
-       "Service": "lambda.amazonaws.com"
-     },
-     "Effect": "Allow",
-     "Sid": ""
-   }
- ]
-}
-EOF
+resource "aws_instance" "ec2" {
+    ami = "ami-096800910c1b781ba"
+    instance_type = "t2.micro"
+    security_groups = [aws_security_group.webtraffic.name]
+    tags = {
+        terraform = "true"
+        Name = "Master_${var.cloud_name}"
+    }
 }
 
-resource "aws_iam_policy" "iam_policy_for_lambda" {
- 
- name = "aws_iam_policy_for_terraform_aws_lambda_role"
- path = "/"
- description = "AWS IAM Policy for managing aws lambda role"
- policy = <<EOF
-{
- "Version": "2012-10-17",
- "Statement": [
-   {
-     "Action": [
-       "logs:CreateLogGroup",
-       "logs:CreateLogStream",
-       "logs:PutLogEvents"
-     ],
-     "Resource": "arn:aws:logs:*:*:*",
-     "Effect": "Allow"
-   }
- ]
-}
-EOF
+resource "aws_eip" "elasticeip" {
+    instance = aws_instance.ec2.id
+  
 }
 
-resource "aws_iam_role_policy_attachment" "attach_iam_policy_to_iam_role" {
-  role = aws_iam_role.lambda_role.name
-  policy_arn = aws_iam_policy.iam_policy_for_lambda.arn
+output "EIP" {
+    value = aws_eip.elasticeip.public_ip
 }
 
-data "archive_file" "zip_the_python_code" {
-  type = "zip"
-  source_dir = "${path.module}/python/"
-  output_path = "${path.module}/python/hello-python.zip"
+module "module_lambda" {
+  source = "./lambda"
 }
-
-#resource "aws_lambda_function" "terraform_lambda_func" {
-#  filename = "${path.module}/python/hello-python.zip"
-#  function_name = "Spacelift_Test_Lambda_Function"
-#  role = aws_iam_role.lambda_role.arn
-#  handler = "script.lambda_handler"
-#  runtime = "python3.9"
-#  depends_on = [aws_iam_role_policy_attachment.attach_iam_policy_to_iam_role]
-#}
