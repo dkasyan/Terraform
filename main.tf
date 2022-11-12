@@ -12,14 +12,14 @@ variable "cost_tag" {
     description = "Enter a name for the tag prd/int/tst"
 }
 
-variable "iegreessrules" {
+variable "ingressrules" {
   type = list(number)
   default = [80, 443 ]
 }
 
-variable "engreesrules" {
+variable "engresrules" {
   type = list(number)
-  default = [80, 443 ]
+  default = [80, 443, 8080 ]
 }
 
 output "vpc_id" {
@@ -55,14 +55,18 @@ output "EIP" {
 }
 
 
-
+#Iterator w dynamic block
 resource "aws_security_group" "webtraffic" {
     name = "Allow HTTPS"
-    ingress {
-        from_port = 443
-        to_port = 443
+    dynamic "ingress" {
+        iterator = port
+        for_each = var.ingressrules
+        content {
+        from_port = port.value
+        to_port = port.value
         protocol = "TCP"
         cidr_blocks = ["0.0.0.0/0"]
+        }
     }
     egress {
         from_port = 443
@@ -127,11 +131,11 @@ data "archive_file" "zip_the_python_code" {
   output_path = "${path.module}/python/hello-python.zip"
 }
 
-resource "aws_lambda_function" "terraform_lambda_func" {
-  filename = "${path.module}/python/hello-python.zip"
-  function_name = "Spacelift_Test_Lambda_Function"
-  role = aws_iam_role.lambda_role.arn
-  handler = "script.lambda_handler"
-  runtime = "python3.9"
-  depends_on = [aws_iam_role_policy_attachment.attach_iam_policy_to_iam_role]
-}
+#resource "aws_lambda_function" "terraform_lambda_func" {
+#  filename = "${path.module}/python/hello-python.zip"
+#  function_name = "Spacelift_Test_Lambda_Function"
+#  role = aws_iam_role.lambda_role.arn
+#  handler = "script.lambda_handler"
+#  runtime = "python3.9"
+#  depends_on = [aws_iam_role_policy_attachment.attach_iam_policy_to_iam_role]
+#}
