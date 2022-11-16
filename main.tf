@@ -70,6 +70,12 @@ resource "aws_instance" "ec2" {
     }
 }
 
+module "ec2_module" {
+    source = "./ec2"
+    ec2_name = "Name from module"
+  
+}
+
 resource "aws_eip" "elasticeip" {
     instance = aws_instance.ec2.id
   
