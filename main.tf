@@ -76,6 +76,11 @@ module "ec2_module" {
   
 }
 
+output "ec2_module_output" {
+    value = module.ec2_module.aws_instance_output_id
+  
+}
+
 resource "aws_eip" "elasticeip" {
     instance = aws_instance.ec2.id
   
