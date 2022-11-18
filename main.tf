@@ -2,6 +2,8 @@ provider "aws" {
     region = "eu-west-1"
 }
 
+#----- variables
+
 variable "cloud_name" {
     type = string
     default = "kasyan.me"
@@ -22,10 +24,6 @@ variable "engresrules" {
   default = [80, 443, 8080 ]
 }
 
-output "vpc_id" {
-    value = aws_vpc.vpc_name.id
-}
-
 #Do czego słuźy zmienna vpc_name. Jest niezbędna, ale jej nazwa nie jest nigdzie wpisywana
 resource "aws_vpc" "vpc_name" {
     cidr_block = "10.0.0.0/16"
@@ -34,10 +32,6 @@ resource "aws_vpc" "vpc_name" {
         Name = "VPC_${var.cloud_name}"
 }
 }
-
-
-
-
 
 #Iterator w dynamic block
 resource "aws_security_group" "webtraffic" {
@@ -76,20 +70,28 @@ module "ec2_module" {
   
 }
 
-output "ec2_module_output" {
-    value = module.ec2_module.aws_instance_output_id
-  
-}
-
 resource "aws_eip" "elasticeip" {
     instance = aws_instance.ec2.id
   
 }
 
+module "module_lambda" {
+  source = "./lambda"
+}
+
+module "module_iam" {
+  source = "./iam"
+}
+
+#----Outputs 
 output "EIP" {
     value = aws_eip.elasticeip.public_ip
 }
 
-module "module_lambda" {
-  source = "./lambda"
+output "vpc_id" {
+    value = aws_vpc.vpc_name.id
+}
+
+output "ec2_module_output" {
+    value = module.ec2_module.aws_instance_output_id 
 }
